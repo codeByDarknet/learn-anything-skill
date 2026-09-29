@@ -132,7 +132,8 @@ line; echo "${BOLD}  ${MSG_CHECKING}: ${TARGET:-*}${N}"; line
 if (( AUTHORING )); then
   EXS=(); while IFS= read -r l; do EXS+=("$l"); done < <(list_exercises "$SEARCH" 0)
   for ex in ${EXS[@]+"${EXS[@]}"}; do
-    sol="${ex/\/exercises\//\/solutions\/}"
+    # Pattern and replacement in variables: bash 3.2 (macOS) keeps backslashes of a literal replacement.
+    from='/exercises/'; to='/solutions/'; sol="${ex/$from/$to}"
     [[ -f "$ex/setup.sh" ]] && (cd "$ex" && bash ./setup.sh > /dev/null 2>&1)
     out="$(run_exercise "$ex")"; st=$?
     if [[ $st == 0 ]]; then grade "$ex  (${MSG_STUB_SHOULD_FAIL})" 1 "$out"; else grade "$ex  [stub fails]" 0 ""; fi
