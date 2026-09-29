@@ -1,0 +1,44 @@
+{
+  "name": "learn-anything-skill",
+  "version": "1.0.0",
+  "description": "An Agent Skill that turns any technology into a hands-on, auto-graded course on your machine — chapters, exercises with real tests, a capstone project, playgrounds and progress tracking. Works with Claude Code, Codex, OpenCode, Gemini CLI, Antigravity, Cursor, Windsurf, Copilot and more.",
+  "keywords": [
+    "agent-skills",
+    "skill",
+    "claude-code",
+    "codex",
+    "opencode",
+    "gemini-cli",
+    "antigravity",
+    "cursor",
+    "windsurf",
+    "learning",
+    "course-generator",
+    "education",
+    "tutor"
+  ],
+  "homepage": "https://github.com/codeByDarknet/learn-anything-skill#readme",
+  "bugs": "https://github.com/codeByDarknet/learn-anything-skill/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codeByDarknet/learn-anything-skill.git"
+  },
+  "license": "MIT",
+  "author": "Abdoul Razack Ouedraogo (https://github.com/codeByDarknet)",
+  "bin": {
+    "learn-anything-skill": "bin/cli.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "skills"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test",
+    "validate": "node scripts/validate-skill.js",
+    "prepublishOnly": "npm run validate && npm test"
+  }
+}

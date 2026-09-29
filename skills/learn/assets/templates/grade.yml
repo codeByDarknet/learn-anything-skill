@@ -1,0 +1,27 @@
+# .github/workflows/grade.yml — template from the `learn` skill.
+# Runs the course checks on every push so the learner sees green/red in GitHub.
+# The agent replaces the setup step with the technology's toolchain.
+name: grade
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # ── toolchain (adapt) ──
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      # ───────────────────────
+      - name: Exercises
+        run: bash tools/check.sh || true   # failing exercises are expected while learning; see the job summary
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Results" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          NO_COLOR=1 bash tools/check.sh >> "$GITHUB_STEP_SUMMARY" 2>&1 || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
