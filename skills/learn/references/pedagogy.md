@@ -63,6 +63,46 @@ Links to the exercises of this lesson and what each trains.
 
 8–15 questions per module mixing: multiple choice with plausible distractors (each distractor = a real misconception), predict-the-output, spot-the-bug, "which would you choose and why", ordering steps. Each answer in `<details>` with the explanation of *why* the others are wrong. In tutor mode (`/learn quiz`) ask them one by one instead of showing the file.
 
+### Quiz file format
+
+Keep this exact shape: the browser Studio (`studio.md`) turns it into an interactive quiz, and `node studio/server.js --check` reports any question it can't read.
+
+````markdown
+# Quiz — <module title>
+
+One or two lines of instructions.
+
+---
+
+**1.** Question text (inline code and code blocks allowed).
+
+- a) Option
+- b) Option
+- c) Option
+
+<details><summary>Answer</summary>
+
+**b.** Why b is right, and why each other option is wrong.
+</details>
+
+---
+
+**2.** Open question: what does this print?
+
+```console
+$ echo hi
+```
+
+<details><summary>Answer</summary>
+
+`hi` — and the explanation.
+</details>
+````
+
+- Questions separated by `---`, numbered `**N.**`. Options `- a)` to `- h)`.
+- Multiple choice: the answer **starts** with the bold letter(s): `**b.**`, `**a, c.**`. That's how the Studio grades the click. Without options, the learner writes an answer, reveals the correction and self-grades.
+- Translate `Quiz`, `Answer` and the text into `lang`; keep the structure.
+
 ## Module README
 
 Objectives, lesson list with links, exercise table (`# | exercise | concepts | difficulty ★☆☆`), capstone milestone of this module, "you're done when" criteria (all checks green + milestone accepted), glossary (beginner).

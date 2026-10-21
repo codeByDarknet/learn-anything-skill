@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learn Studio</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23e8643c'/%3E%3Cpath d='M8 11l8-4 8 4-8 4z' fill='white'/%3E%3Cpath d='M11 13.5v5c0 1.5 2.5 3 5 3s5-1.5 5-3v-5' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/vendor/xterm/css/xterm.css">
+  <link rel="stylesheet" href="/vendor/codemirror/lib/codemirror.css">
+  <link rel="stylesheet" href="/vendor/codemirror/theme/material-darker.css">
+  <link rel="stylesheet" href="/static/app.css">
+  <script>
+    try { const t = localStorage.getItem('studio-theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <button class="icon-btn only-mobile" id="menu-btn" data-i18n-label="menu">☰</button>
+    <a class="brand" href="#/">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>Studio <em id="brand-title"></em></span>
+    </a>
+    <div class="top-progress" id="top-progress"></div>
+    <div class="top-actions">
+      <button class="btn ghost" id="drawer-btn" data-i18n="drawer_btn" data-i18n-title="drawer_title">⌘ Terminal</button>
+      <button class="icon-btn" id="theme-btn" data-i18n-title="theme" data-i18n-label="theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <nav class="sidebar" id="sidebar"></nav>
+    <main class="main" id="main"></main>
+  </div>
+
+  <section class="drawer" id="drawer" hidden>
+    <div class="drawer-head">
+      <div class="drawer-grip" id="drawer-grip"></div>
+      <strong data-i18n="terminal">Terminal</strong>
+      <span class="muted" id="drawer-cwd">playground/</span>
+      <span class="spacer"></span>
+      <button class="btn ghost small" id="drawer-restart" data-i18n="restart">Restart</button>
+      <button class="icon-btn" id="drawer-close" data-i18n-label="close">✕</button>
+    </div>
+    <div class="drawer-body" id="drawer-body"></div>
+  </section>
+
+  <div class="modal" id="modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true">
+      <button class="icon-btn modal-close" id="modal-close" data-i18n-label="close">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="/vendor/xterm/lib/xterm.js"></script>
+  <script src="/vendor/xterm-fit/lib/addon-fit.js"></script>
+  <script src="/vendor/xterm-links/lib/addon-web-links.js"></script>
+  <script src="/vendor/codemirror/lib/codemirror.js"></script>
+  <script src="/vendor/codemirror/addon/mode/simple.js"></script>
+  <script src="/vendor/codemirror/addon/mode/overlay.js"></script>
+  <script src="/vendor/codemirror/addon/edit/matchbrackets.js"></script>
+  <script src="/vendor/codemirror/addon/selection/active-line.js"></script>
+  <!-- Editor syntax modes. Order matters: xml/javascript/css before htmlmixed, clike before dart/php. -->
+  <script src="/vendor/codemirror/mode/yaml/yaml.js"></script>
+  <script src="/vendor/codemirror/mode/shell/shell.js"></script>
+  <script src="/vendor/codemirror/mode/javascript/javascript.js"></script>
+  <script src="/vendor/codemirror/mode/markdown/markdown.js"></script>
+  <script src="/vendor/codemirror/mode/dockerfile/dockerfile.js"></script>
+  <script src="/vendor/codemirror/mode/properties/properties.js"></script>
+  <script src="/vendor/codemirror/mode/diff/diff.js"></script>
+  <script src="/vendor/codemirror/mode/toml/toml.js"></script>
+  <script src="/vendor/codemirror/mode/xml/xml.js"></script>
+  <script src="/vendor/codemirror/mode/css/css.js"></script>
+  <script src="/vendor/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+  <script src="/vendor/codemirror/mode/jsx/jsx.js"></script>
+  <script src="/vendor/codemirror/mode/clike/clike.js"></script>
+  <script src="/vendor/codemirror/mode/dart/dart.js"></script>
+  <script src="/vendor/codemirror/mode/python/python.js"></script>
+  <script src="/vendor/codemirror/mode/go/go.js"></script>
+  <script src="/vendor/codemirror/mode/rust/rust.js"></script>
+  <script src="/vendor/codemirror/mode/sql/sql.js"></script>
+  <script src="/vendor/codemirror/mode/ruby/ruby.js"></script>
+  <script src="/vendor/codemirror/mode/php/php.js"></script>
+  <script src="/vendor/codemirror/mode/swift/swift.js"></script>
+  <script src="/vendor/codemirror/mode/powershell/powershell.js"></script>
+  <script src="/vendor/codemirror/mode/nginx/nginx.js"></script>
+  <script src="/vendor/codemirror/mode/lua/lua.js"></script>
+  <script src="/vendor/codemirror/mode/perl/perl.js"></script>
+  <script src="/vendor/codemirror/mode/r/r.js"></script>
+  <script src="/vendor/codemirror/mode/julia/julia.js"></script>
+  <script src="/vendor/codemirror/mode/erlang/erlang.js"></script>
+  <script src="/vendor/codemirror/mode/groovy/groovy.js"></script>
+  <script src="/vendor/codemirror/mode/haskell/haskell.js"></script>
+  <script src="/vendor/codemirror/mode/clojure/clojure.js"></script>
+  <script src="/vendor/codemirror/mode/mllike/mllike.js"></script>
+  <script src="/vendor/codemirror/mode/elm/elm.js"></script>
+  <script src="/vendor/codemirror/mode/protobuf/protobuf.js"></script>
+  <script src="/vendor/codemirror/mode/cmake/cmake.js"></script>
+  <script type="module" src="/static/app.js"></script>
+</body>
+</html>

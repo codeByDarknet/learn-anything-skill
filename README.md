@@ -4,7 +4,7 @@
 
 **An [Agent Skill](https://agentskills.io) that generates a complete, auto-graded course on your machine — then tutors you through it.**
 
-Chapters · real exercises with tests · a capstone project · playgrounds · progress tracking · any human language
+Chapters · real exercises with tests · a capstone project · playgrounds · progress tracking · a browser Studio · any human language
 
 [![npm](https://img.shields.io/npm/v/learn-anything-skill?color=cb3837)](https://www.npmjs.com/package/learn-anything-skill)
 [![ci](https://github.com/codeByDarknet/learn-anything-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/codeByDarknet/learn-anything-skill/actions/workflows/ci.yml)
@@ -26,7 +26,7 @@ npx learn-anything-skill
 /learn docker yes
 ```
 
-Type one line in your coding agent and you get a **real course folder**: lessons that explain *why* things work, exercises that are **graded automatically** (native unit tests for code, live state checks for infrastructure), a **capstone project** that grows with every module, a **local playground** to experiment safely, and a **tutor** that gives hints instead of answers and keeps track of your progress.
+Type one line in your coding agent and you get a **real course folder**: lessons that explain *why* things work, exercises that are **graded automatically** (native unit tests for code, live state checks for infrastructure), a **capstone project** that grows with every module, a **local playground** to experiment safely, a **tutor** that gives hints instead of answers and keeps track of your progress — and, if you want, a **browser Studio** where you do the whole course without opening an editor.
 
 It works with **Claude Code, OpenAI Codex, OpenCode, Gemini CLI, Google Antigravity, Cursor, Windsurf, GitHub Copilot, Kiro, Goose, Amp, Roo Code** and any agent that reads `SKILL.md` files.
 
@@ -64,9 +64,11 @@ learn-kubernetes/
 │   ├── solutions/          # reference solutions + NOTES.md (why, alternatives)
 │   └── quiz.md
 ├── 01-pods/ ... 13-troubleshooting/
-└── capstone/               # the project you build across the whole course
-    ├── milestones/         # one per module, with acceptance criteria
-    └── tests/              # automated acceptance checks
+├── capstone/               # the project you build across the whole course
+│   ├── milestones/         # one per module, with acceptance criteria
+│   └── tests/              # automated acceptance checks
+├── studio/                 # optional: the browser Studio (studio=yes)
+└── studio.sh               # ./studio.sh → http://localhost:4242
 ```
 
 | | |
@@ -77,6 +79,7 @@ learn-kubernetes/
 | 🧪 **Playgrounds & tools** | Local, disposable, free by default: Docker, kind/k3d, emulators, LocalStack, seeded databases. Install commands for your OS, run only with your approval. |
 | 📈 **Progress tracking** | Based on real check results (`.learn/results.log`), not on "I read it". Weak concepts are detected and revisited. |
 | 🧑‍🏫 **A tutor** | `/learn hint` gives graduated hints, `/learn explain` teaches with your own code, `/learn review` reviews like a senior engineer, `/learn quiz` adapts to your answers. |
+| 🖥️ **A browser Studio (optional)** | The whole course in one local web page: lessons, a real terminal, a file editor, one-click *Set up / Check / Solution*, hints that unfold one by one, interactive quizzes, capstone milestones and your progress. The agent asks whether you want it; `/learn studio` adds it to an existing course. |
 | 🌍 **Any language** | The whole course — lessons, comments, test messages, quizzes — in the language you choose. |
 | 🐙 **GitHub-ready** | `git init` by default; `github=yes` creates a private repo with a CI workflow that grades on every push. |
 
@@ -137,7 +140,7 @@ Restart your agent (or open a new session) after installing.
 ```text
 /learn <technology> [lang=<language>] [level=beginner|intermediate|advanced]
                     [goal="..."] [project="..."] [path=./dir] [time=1h/day]
-                    [github=yes] [yes]
+                    [studio=yes|no] [github=yes] [yes]
 ```
 
 | Parameter | Default | |
@@ -149,10 +152,11 @@ Restart your agent (or open a new session) after installing.
 | `project` | proposed | Your own capstone idea. |
 | `path` | `./learn-<tech>` | Where to create the course. |
 | `time` | `1h/day` | Used for sizing and the schedule estimate. |
+| `studio` | asked | `yes` → install the browser Studio (needs Node.js ≥ 20). `no` → editor + terminal only. |
 | `github` | `no` | `yes` → private GitHub repo + CI grading (asks before creating anything). |
 | `yes` | off | Skip the intake questions, use defaults. |
 
-Without `yes`, the agent asks up to 5 quick questions (level, goal, experience, time, capstone), shows you the outline, then **generates the entire course in one go** and verifies every exercise.
+Without `yes`, the agent asks up to 6 quick questions (level, goal, experience, time, capstone, browser or editor), shows you the outline, then **generates the entire course in one go** and verifies every exercise.
 
 ### While learning
 
@@ -165,10 +169,15 @@ Without `yes`, the agent asks up to 5 quick questions (level, goal, experience, 
 | `/learn explain <concept>` | Mental model + an experiment to run in the playground |
 | `/learn quiz [module]` | Adaptive quiz, one question at a time |
 | `/learn review` | Senior-engineer review of your code |
+| `/learn studio [start\|stop\|service\|remove]` | Install, start or auto-start the browser Studio |
 | `/learn add <topic>` | Add a module or extra exercises |
 | `/learn resume` | Continue an interrupted generation |
 
-The course is plain files: you can also work **without any AI**, just with your editor and `./tools/check.sh`.
+The course is plain files: you can also work **without any AI**, just with your editor and `./tools/check.sh` — or with the Studio in your browser (`./studio.sh`, or `.\studio.ps1` on Windows).
+
+### The browser Studio
+
+A small local web app (Node.js, listening on `127.0.0.1` only) copied into the course as `studio/`. The dashboard's **Continue** button always takes you to the next step; each exercise opens a workspace with a terminal in the exercise folder, an editor with autosave and the check output; quizzes are clickable and scored; `PROGRESS.md` and `.learn/progress.json` update by themselves, so the tutor commands see the same progress. `./studio.sh --service` (Linux/macOS) or `.\studio.ps1 -Service` (Windows) starts it at every login. The interface is in English and French; the agent translates it for other languages.
 
 > Agents without slash commands: ask in plain words — *"use the learn skill to teach me Rust, in Spanish"*. In Codex: `$learn rust lang=es`.
 
@@ -224,9 +233,11 @@ The skill is a set of instructions for your agent (in [`skills/learn`](skills/le
 | [`references/progress.md`](skills/learn/references/progress.md) | Manifest and progress schemas |
 | [`references/tutoring.md`](skills/learn/references/tutoring.md) | Tutor behaviour for every subcommand |
 | [`references/i18n.md`](skills/learn/references/i18n.md) | Writing the course in any language |
+| [`references/studio.md`](skills/learn/references/studio.md) | Installing and checking the browser Studio, the course contract it reads |
+| [`assets/studio/`](skills/learn/assets/studio) | The browser Studio (server, UI, launchers), copied into the course when you want it |
 | [`assets/templates/`](skills/learn/assets/templates) | Portable grading scripts (`check.sh` for bash 3.2+, `check.ps1` for Windows), README/PROGRESS templates, CI workflow |
 
-Generation flow: **discover your environment → short intake → design the curriculum (`.learn/course.json`) → generate everything module by module → install tools (with approval) → verify every exercise (stubs fail, solutions pass) → `git init` → hand-off**. If the agent runs out of context, `/learn resume` continues from the manifest.
+Generation flow: **discover your environment → short intake → design the curriculum (`.learn/course.json`) → generate everything module by module → install tools (with approval) → verify every exercise (stubs fail, solutions pass) → optional browser Studio (`--check` must pass) → `git init` → hand-off**. If the agent runs out of context, `/learn resume` continues from the manifest.
 
 Only the lightweight description is loaded until you invoke the skill; references are read on demand (progressive disclosure), so it costs nothing when you're not using it.
 
@@ -261,8 +272,11 @@ A full language course is typically 10–15 modules, 50–80 exercises and a cap
 **Will it install things on my machine?**
 Only after showing you the exact command and getting your approval. Playgrounds are local and disposable; nothing touching the cloud or costing money is done without explicit consent.
 
+**Can I do the course without an editor?**
+Yes: answer "in the browser" (or pass `studio=yes`) and everything — reading, terminal, editing, grading, quizzes, progress — happens on `http://localhost:4242`. It needs Node.js 20+; on Linux the terminal module compiles once (`python3`, `make`, `g++`).
+
 **Windows?**
-Yes: `tools/check.ps1` for PowerShell, file names are Windows/NTFS-safe, SETUP.md covers Windows (native and WSL).
+Yes: `tools/check.ps1` for PowerShell, `studio.ps1` for the Studio, file names are Windows/NTFS-safe, SETUP.md covers Windows (native and WSL).
 
 **The same skill shows up twice in my agent.**
 Some agents read several directories (e.g. `~/.agents/skills` *and* their own). Install to only one of them: `npx learn-anything-skill uninstall --agent agents`.

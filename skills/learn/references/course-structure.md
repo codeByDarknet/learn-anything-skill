@@ -43,6 +43,10 @@ learn-<slug>/
     ├── starter/              # Skeleton the learner builds on (or `app/`, idiomatic name)
     ├── reference/            # Optional reference implementation, one tag/folder per milestone
     └── tests/                # Acceptance tests / validate scripts per milestone
+
+# Only with the browser Studio (studio=yes, see studio.md):
+├── studio.sh / studio.ps1    # Start the Studio (and --service / -Service for auto-start)
+└── studio/                   # Copied from assets/studio/; studio/node_modules/ is git-ignored
 ```
 
 Numbering is two digits, zero-padded, starting at `00`. Module folders sort in learning order.

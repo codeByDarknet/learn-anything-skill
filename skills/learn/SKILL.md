@@ -1,10 +1,10 @@
 ---
 name: learn
-description: Generate a complete, hands-on course for any technology (programming language, framework, DevOps/cloud tool, database, dev tool) directly on the learner's machine — Markdown chapters, auto-graded exercises with real tests or check scripts, a capstone project built chapter after chapter, playground and tool setup, and progress tracking — then tutor the learner through it in any human language. Use when the user types /learn <technology> (e.g. "/learn go", "/learn kubernetes lang=fr", "/learn flutter level=beginner"), asks to learn, study, practice or master a technology, or asks for status, check, hint, explain, quiz or next on a course created by this skill.
+description: Generate a complete, hands-on course for any technology (programming language, framework, DevOps/cloud tool, database, dev tool) directly on the learner's machine — Markdown chapters, auto-graded exercises with real tests or check scripts, a capstone project built chapter after chapter, playground and tool setup, progress tracking, and an optional local browser Studio (lessons, terminal, editor, one-click grading, quizzes) — then tutor the learner through it in any human language. Use when the user types /learn <technology> (e.g. "/learn go", "/learn kubernetes lang=fr", "/learn flutter level=beginner"), asks to learn, study, practice or master a technology, or asks for status, check, hint, explain, quiz or next on a course created by this skill.
 license: MIT
 metadata:
   author: codeByDarknet
-  version: "1.0.0"
+  version: "1.1.0"
   homepage: https://github.com/codeByDarknet/learn-anything-skill
 ---
 
@@ -29,6 +29,7 @@ Invocation: `/learn <technology> [key=value ...]` or natural language ("teach me
 | `path=` | `./learn-<slug>` in the current directory | Where to create the course. |
 | `time=` | `1h/day` | Weekly availability; used to size modules and estimate the schedule. |
 | `project=` | derived from `goal` | Capstone idea, if the learner has one. |
+| `studio=` | ask (`yes` with `quick` if Node.js ≥ 20 is available) | `yes` = install the **browser Studio**: the whole course in a local web page (lessons, terminal, file editor, one-click checks, quizzes, progress), so the learner never needs to open an editor. `no` = editor + terminal only. See `references/studio.md`. |
 | `github=` | `no` | `yes` = init git, create a **private** GitHub repo with `gh` and add CI grading (ask for confirmation before creating anything remote). |
 | `yes` / `quick` | off | Skip the intake questions and the outline confirmation; use defaults. |
 
@@ -44,6 +45,7 @@ Subcommands (run inside a course folder, or pass `path=`):
 | `/learn next` | Tell exactly what to do next (lesson, exercise or capstone milestone) based on progress. |
 | `/learn review` | Review the learner's code for the current exercise/milestone like a senior engineer: correctness, idioms, tests, naming. |
 | `/learn resume` | Continue an interrupted generation (see §4.6). |
+| `/learn studio [start\|stop\|service\|remove]` | Browser Studio: install it into an existing course if it has none (same steps as §4.4 step 6), start it and give the URL, install/remove auto-start at login, or remove it. See `references/studio.md`. |
 | `/learn add <topic>` | Add a module or bonus exercises to an existing course, keeping numbering, manifest and checks consistent. |
 
 If the argument is a subcommand but no `.learn/course.json` is found in the current directory or its parents, say so and offer to create a course.
@@ -80,11 +82,15 @@ The default is to **generate the entire course in one go** (all modules, lessons
 
 ### 4.1 Discover the environment (no questions yet)
 
-Run quick, read-only probes: OS and architecture, shell, available package managers (`brew`, `apt`, `winget`, `choco`, `scoop`), whether the technology and its companions are already installed and which versions (`<tool> --version`), Docker availability, `git` and `gh` (and `gh auth status`), free disk space if the playground is heavy. Detect whether the target `path` already exists (never overwrite an existing course — offer `resume`, `add`, or a new path).
+Run quick, read-only probes: OS and architecture, shell, available package managers (`brew`, `apt`, `winget`, `choco`, `scoop`), whether the technology and its companions are already installed and which versions (`<tool> --version`), Docker availability, `git` and `gh` (and `gh auth status`), free disk space if the playground is heavy, and `node --version` (the browser Studio needs Node.js ≥ 20). Detect whether the target `path` already exists (never overwrite an existing course — offer `resume`, `add`, or a new path).
 
 ### 4.2 Intake (one short round, skippable)
 
-If `yes`/`quick` was passed, skip. Otherwise ask **at most 5** questions in a single batch, each with a recommended default, using your harness's question tool if it has one (otherwise a numbered list in chat and wait): level, goal / what they want to build, prior experience in related tech, weekly time, capstone idea (offer 3 concrete ideas tailored to the goal). Accept "defaults" as an answer.
+If `yes`/`quick` was passed, skip. Otherwise ask **at most 6** questions in a single batch, each with a recommended default, using your harness's question tool if it has one (otherwise a numbered list in chat and wait): level, goal / what they want to build, prior experience in related tech, weekly time, capstone idea (offer 3 concrete ideas tailored to the goal), and **where they want to learn** (unless `studio=` was given):
+- **In the browser (recommended)** — a local Studio page holds everything: lessons, a real terminal, a file editor, one-click checks, quizzes and progress. Nothing else to open.
+- **In my editor + terminal** — plain files and `tools/check.sh`; the Studio can be added later with `/learn studio`.
+
+If Node.js ≥ 20 is missing, say the Studio needs it (and offer to install it in §4.5). Accept "defaults" as an answer.
 
 ### 4.3 Design the curriculum
 
@@ -107,6 +113,7 @@ Order of generation (update `generation` status in `course.json` after each step
 3. For each module: `README.md` (objectives, plan, exercise table) → `lessons/NN-*.md` → `exercises/NN-*/` (statement + stub + tests/check) → `solutions/NN-*/` → `quiz.md`.
 4. `capstone/`: `README.md` (the product, user stories, architecture sketch), `milestones/NN-*.md` (one per module, with acceptance criteria), a starter skeleton, and automated acceptance tests or `validate` script per milestone.
 5. Optional: `.github/workflows/grade.yml` running the checks on push.
+6. If `studio=yes`: the browser Studio — copy `assets/studio/` into `<course>/studio/` and move `studio.sh` / `studio.ps1` to the course root, translate `studio/README.md` and add the UI strings for `lang` to `studio/public/i18n.js` if it is neither `en` nor `fr`, set `capstone.dir` and `studio` in `course.json`, add `studio/node_modules/` to `.gitignore`. Exact steps in `references/studio.md`.
 
 Follow `references/course-structure.md` for exact layouts and `references/exercises.md` for exercise and test design.
 
@@ -120,6 +127,7 @@ Follow `references/course-structure.md` for exact layouts and `references/exerci
 2. Run the full check suite in "authoring" mode: stubs must fail, solutions must pass, capstone reference tests pass against the reference implementation if you wrote one. See `references/exercises.md` §Verification.
 3. Initialize git in the course (`git init`, first commit "course generated") so the learner can see their own diff over time. If `github=yes`, and after explicit confirmation, `gh repo create <name> --private --source . --push`.
 4. Record verification results in `course.json` (`verified: true/false`, which checks could not run and why).
+5. If `studio=yes`: `npm install` in `studio/` (on Linux `node-pty` compiles: needs `python3`, `make`, `g++`), then `node studio/server.js --check` and fix the **course** until it passes with no error (missing files, quizzes it cannot parse, unmapped milestones). Start it (`./studio.sh` or `.\studio.ps1`), confirm `http://localhost:<port>/api/state` answers, and offer — never impose — auto-start at login (`./studio.sh --service`).
 
 ### 4.6 Resume
 
@@ -127,11 +135,11 @@ If generation is interrupted (context limit, crash, user stop), `/learn resume` 
 
 ### 4.7 Hand-off message
 
-In `lang`: where the course is, how to start (the exact first 3 commands), how to check an exercise, how to ask for help (`/learn hint`, `/learn explain`, `/learn status`), estimated schedule, and any checks that could not be run.
+In `lang`: where the course is, how to start (the exact first 3 commands — or, with the Studio, its URL and that "Continue" on the dashboard leads the way), how to check an exercise, how to ask for help (`/learn hint`, `/learn explain`, `/learn status`), estimated schedule, and any checks that could not be run.
 
 ## 5. Tutor mode
 
-When the learner works through the course, you are a demanding, kind senior engineer. Read `references/tutoring.md`. Key rules: ask what they tried; hints before answers; make them predict before running; celebrate passing checks briefly; turn every failure into a concept; adapt — if a concept keeps failing, generate an extra targeted exercise with `/learn add`.
+When the learner works through the course, you are a demanding, kind senior engineer. Read `references/tutoring.md`. Key rules: ask what they tried; hints before answers; make them predict before running; celebrate passing checks briefly; turn every failure into a concept; adapt — if a concept keeps failing, generate an extra targeted exercise with `/learn add`. The Studio writes the same files you read (`.learn/results.log`, `.learn/progress.json`, `PROGRESS.md`), so tutoring works the same whether the learner clicks *Check* in the browser or asks you.
 
 ## 6. References
 
@@ -147,4 +155,6 @@ Read only what you need for the current step.
 | `references/progress.md` | `course.json` / `progress.json` schemas, status computation |
 | `references/tutoring.md` | Any subcommand: check, hint, explain, quiz, review, next |
 | `references/i18n.md` | Writing in a language other than English |
+| `references/studio.md` | Installing, checking and running the browser Studio; `/learn studio` |
 | `assets/templates/*` | Starting points for root files and check scripts |
+| `assets/studio/` | The browser Studio, copied as-is into the course |

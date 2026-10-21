@@ -8,7 +8,7 @@ Three files under `.learn/`. JSON is written by the agent; `results.log` is appe
 {
   "schema": 1,
   "skill": "learn",
-  "skillVersion": "1.0.0",
+  "skillVersion": "1.1.0",
   "createdAt": "2026-09-29T10:00:00Z",
   "params": {
     "technology": "Kubernetes",
@@ -43,7 +43,8 @@ Three files under `.learn/`. JSON is written by the agent; `results.log` is appe
       "milestone": "capstone/milestones/03-deploy-api.md"
     }
   ],
-  "capstone": { "title": "...", "milestones": [ { "id": "03", "file": "capstone/milestones/03-deploy-api.md", "check": "./tools/check.sh capstone 03" } ] },
+  "studio": { "enabled": true, "port": 4242 },
+  "capstone": { "title": "...", "dir": "capstone/starter", "milestones": [ { "id": "03", "file": "capstone/milestones/03-deploy-api.md", "check": "./tools/check.sh capstone 03" } ] },
   "generation": {
     "root": "done",
     "playground": "done",
@@ -62,6 +63,8 @@ Three files under `.learn/`. JSON is written by the agent; `results.log` is appe
 }
 ```
 
+`capstone.dir` is the folder the learner builds the capstone in (the Studio opens its terminal and editor there). `studio` is present only when the browser Studio was installed (`studio.md`).
+
 Statuses: `pending` → `in_progress` → `done`. Update after each group so `/learn resume` knows where to continue.
 
 ## `.learn/results.log` — written by check scripts
@@ -74,7 +77,7 @@ Tab-separated, one line per graded target, append-only:
 2026-10-02T09:01:12Z	capstone/03	pass
 ```
 
-## `.learn/progress.json` — learner state (agent-maintained)
+## `.learn/progress.json` — learner state (agent- and Studio-maintained)
 
 ```json
 {
@@ -86,7 +89,7 @@ Tab-separated, one line per graded target, append-only:
     "03-02": { "status": "passed", "attempts": 3, "firstPassAt": "2026-09-30T18:22:01Z", "hintsUsed": 1, "solutionViewed": false }
   },
   "milestones": { "03": { "status": "passed", "at": "2026-10-02T09:01:12Z" } },
-  "quizzes": { "03": { "score": 9, "total": 12, "at": "2026-10-01T20:00:00Z", "missedConcepts": ["maxSurge"] } },
+  "quizzes": { "03": { "score": 9, "total": 12, "at": "2026-10-01T20:00:00Z", "missed": [4, 7, 11], "best": 10, "attempts": 2, "missedConcepts": ["maxSurge"] } },
   "weakConcepts": { "readinessProbe": 2 },
   "streakDays": 3,
   "notes": []
@@ -98,7 +101,7 @@ Tab-separated, one line per graded target, append-only:
 1. Read `results.log`; for each exercise/milestone, `passed` if its latest result is `pass`, `failing` if latest is `fail`, `todo` if never run. Attempts = number of lines.
 2. Lessons are marked done when the learner says so or when all exercises of the lesson pass.
 3. A module is **complete** when all its exercises pass and its milestone passes. Quiz is recommended, not required.
-4. `weakConcepts`: +1 for each concept of an exercise with ≥3 failing attempts, of a missed quiz question, or when a hint level 3 was needed.
+4. `weakConcepts`: +1 for each concept of an exercise with ≥3 failing attempts, of a missed quiz question, or when a hint level 3 was needed. The Studio records missed quiz questions by number (`missed`); you record concepts (`missedConcepts`) when you run `/learn quiz`. Keep both fields — the Studio and you write the same file.
 5. Regenerate `PROGRESS.md` (checkboxes + per-module bar like `██████░░░░ 60%`) and write `progress.json`.
 
 ## `/learn status` output (in `lang`)

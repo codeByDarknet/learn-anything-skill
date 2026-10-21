@@ -1,6 +1,6 @@
 {
   "name": "learn-anything-skill",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "An Agent Skill that turns any technology into a hands-on, auto-graded course on your machine — chapters, exercises with real tests, a capstone project, playgrounds and progress tracking. Works with Claude Code, Codex, OpenCode, Gemini CLI, Antigravity, Cursor, Windsurf, Copilot and more.",
   "keywords": [
     "agent-skills",
